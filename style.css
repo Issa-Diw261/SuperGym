@@ -805,12 +805,14 @@ select {
   width: 100%;
 }
 
+/* ==========================================
+   التجاوب مع شاشات الموبايل (Responsive)
+   ========================================== */
 @media (max-width: 600px) {
   .gym-header {
-    flex-direction: column;
-    align-items: stretch;
+    position: relative;
     padding: 14px;
-    gap: 12px;
+    padding-top: 55px; /* مساحة علوية للأزرار لتجنب التداخل */
   }
 
   .header-content {
@@ -818,6 +820,7 @@ select {
     align-items: center;
     text-align: center;
     gap: 8px;
+    width: 100%;
   }
 
   .brand-typography {
@@ -828,8 +831,19 @@ select {
     display: none;
   }
 
+  /* تثبيت أزرار القفل والوضع الليلي في الزاوية اليسرى العليا */
   .header-actions {
-    justify-content: center;
+    position: absolute;
+    top: 12px;
+    left: 14px;
+    gap: 8px;
+  }
+
+  .lock-quick-btn,
+  .theme-toggle-btn {
+    width: 38px;
+    height: 38px;
+    font-size: 15px;
   }
 
   .container {
