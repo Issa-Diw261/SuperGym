@@ -2,10 +2,10 @@
 // 1. إعدادات تيليجرام والأمان
 // ==========================================
 const TELEGRAM_CONFIG = {
-  botUsername: "SuperGymBackup_bot", // يوزر البوت لفتح المحادثة مباشرة
+  botUsername: "SuperGymBackup_bot",
 };
 
-const MASTER_PIN = "1234"; // رمز فك القفل الافتراضي
+const MASTER_PIN = "1234";
 
 // ==========================================
 // 2. نظام القفل التلقائي بعد دقيقة سكون
@@ -17,7 +17,7 @@ const lockError = document.getElementById("lockError");
 const manualLockBtn = document.getElementById("manualLockBtn");
 
 let idleTimer = null;
-const IDLE_TIME_LIMIT = 60 * 1000; // دقيقة واحدة (60 ثانية)
+const IDLE_TIME_LIMIT = 60 * 1000;
 
 function lockApp() {
   lockScreen.classList.remove("hide");
@@ -43,7 +43,6 @@ function resetIdleTimer() {
 });
 
 resetIdleTimer();
-
 manualLockBtn.addEventListener("click", lockApp);
 
 unlockForm.addEventListener("submit", (e) => {
@@ -95,6 +94,7 @@ const resName = document.getElementById("resName");
 const resDetails = document.getElementById("resDetails");
 const resStatus = document.getElementById("resStatus");
 const renewBtn = document.getElementById("renewBtn");
+const editMemberBtn = document.getElementById("editMemberBtn");
 const addMemberForm = document.getElementById("addMemberForm");
 const themeToggleBtn = document.getElementById("themeToggleBtn");
 const themeIcon = document.getElementById("themeIcon");
@@ -204,6 +204,7 @@ function showNotFound(identifier) {
   resStatus.textContent = `المشترك (${identifier}) غير مسجل في سوبر جيم`;
   resStatus.style.color = "var(--dark-red)";
   renewBtn.style.display = "none";
+  editMemberBtn.style.display = "none";
 }
 
 function checkMember(id) {
@@ -223,6 +224,8 @@ function checkMember(id) {
   const end = new Date(currentMember.endDate);
   const diffTime = end - today;
   const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+  editMemberBtn.style.display = "inline-block";
 
   if (diffDays >= 0) {
     resultCard.className = "result-card active";
@@ -312,7 +315,62 @@ function saveData() {
 }
 
 // ==========================================
-// 7. التنبيهات واللوحة الجانبية
+// 7. نافذة تعديل بيانات المشترك (Edit Modal)
+// ==========================================
+const editModal = document.getElementById("editModal");
+const closeEditModalBtn = document.getElementById("closeEditModalBtn");
+const cancelEditBtn = document.getElementById("cancelEditBtn");
+const editMemberForm = document.getElementById("editMemberForm");
+const editMemberCardId = document.getElementById("editMemberCardId");
+const editMemberId = document.getElementById("editMemberId");
+const editFullName = document.getElementById("editFullName");
+const editPhone = document.getElementById("editPhone");
+const editGender = document.getElementById("editGender");
+const editActivity = document.getElementById("editActivity");
+const editEndDate = document.getElementById("editEndDate");
+
+editMemberBtn.addEventListener("click", () => {
+  if (!currentMember) return;
+
+  editMemberCardId.textContent = `#${currentMember.id}`;
+  editMemberId.value = currentMember.id;
+  editFullName.value = currentMember.name;
+  editPhone.value = currentMember.phone;
+  editGender.value = currentMember.gender;
+  editActivity.value = currentMember.activity;
+  editEndDate.value = currentMember.endDate;
+
+  editModal.classList.remove("hide");
+});
+
+function closeEditModal() {
+  editModal.classList.add("hide");
+}
+
+closeEditModalBtn.addEventListener("click", closeEditModal);
+cancelEditBtn.addEventListener("click", closeEditModal);
+
+editMemberForm.addEventListener("submit", (e) => {
+  e.preventDefault();
+  const id = parseInt(editMemberId.value);
+  const targetIndex = members.findIndex((m) => m.id === id);
+
+  if (targetIndex !== -1) {
+    members[targetIndex].name = editFullName.value.trim();
+    members[targetIndex].phone = editPhone.value.trim();
+    members[targetIndex].gender = editGender.value;
+    members[targetIndex].activity = editActivity.value;
+
+    saveData();
+    closeEditModal();
+    checkMember(id);
+    renderExpiring();
+    alert(`تم تعديل بيانات المشترك #${id} بنجاح!`);
+  }
+});
+
+// ==========================================
+// 8. التنبيهات واللوحة الجانبية
 // ==========================================
 openDrawerBtn.addEventListener("click", () => {
   expiringDrawer.classList.add("active");
@@ -339,7 +397,6 @@ window.handleWhatsAppReminder = function (id) {
     `مرحباً ${member.name}، نود تذكيرك من إدارة نادي سوبر جيم بقرب انتهاء اشتراكك بتاريخ ${member.endDate}. نتشرف بوجودك دائماً.`,
   );
   window.open(`https://wa.me/${member.phone}?text=${msg}`, "_blank");
-
   renderExpiring();
 };
 
@@ -357,7 +414,7 @@ function generateExpiringItemHTML(m) {
         ${
           isSentToday
             ? `<span class="wa-btn sent-today">تم الإرسال اليوم ✓</span>
-             <a class="wa-btn-retry" href="javascript:void(0)" onclick="handleWhatsAppReminder(${m.id})">تذكير مرة أخرى</a>`
+               <a class="wa-btn-retry" href="javascript:void(0)" onclick="handleWhatsAppReminder(${m.id})">تذكير مرة أخرى</a>`
             : `<a class="wa-btn" href="javascript:void(0)" onclick="handleWhatsAppReminder(${m.id})">إرسال واتساب</a>`
         }
       </div>
@@ -403,19 +460,20 @@ function renderExpiring() {
 renderExpiring();
 
 // ==========================================
-// 8. النسخ الاحتياطي وفتح محادثة التيليجرام
+// 9. النسخ الاحتياطي وتصدير كشوفات Excel
 // ==========================================
 const sendBackupTelegramBtn = document.getElementById("sendBackupTelegramBtn");
+const exportExcelBtn = document.getElementById("exportExcelBtn");
 const restoreFileInput = document.getElementById("restoreFileInput");
 const backupStatus = document.getElementById("backupStatus");
 
+// نسخ وتيليجرام
 sendBackupTelegramBtn.addEventListener("click", () => {
   const now = new Date();
   const dateStr = now.toISOString().split("T")[0];
   const fileName = `supergym_backup_${dateStr}.json`;
   const dataString = JSON.stringify(members, null, 2);
 
-  // 1. تنزيل ملف النسخة الاحتياطية على الكمبيوتر فوراً
   const blob = new Blob([dataString], { type: "application/json" });
   const downloadUrl = URL.createObjectURL(blob);
   const a = document.createElement("a");
@@ -426,16 +484,166 @@ sendBackupTelegramBtn.addEventListener("click", () => {
   document.body.removeChild(a);
   URL.revokeObjectURL(downloadUrl);
 
-  // 2. فتح محادثة البوت في تيليجرام
   const tgUrl = `https://t.me/${TELEGRAM_CONFIG.botUsername}`;
   window.open(tgUrl, "_blank");
 
-  // 3. تحديث رسالة الحالة
   backupStatus.style.color = "var(--green)";
-  backupStatus.textContent = `✓ تم تنزيل الملف (${fileName}) وفتح البوت في تيليجرام بنجاح!`;
+  backupStatus.textContent = `✓ تم تنزيل النسخة (${fileName}) وفتح البوت بنجاح!`;
 });
+// تصدير كشف المشتركين إلى Excel بأعمدة وخلايا حقيقية (A, B, C, D...)
+exportExcelBtn.addEventListener("click", () => {
+  if (members.length === 0) {
+    alert("لا توجد بيانات مشتركين لتصديرها.");
+    return;
+  }
 
-// استعادة النسخة الاحتياطية من ملف
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  // 1. عناوين الأعمدة في الصف الأول (A1, B1, C1...)
+  const headers = [
+    "رقم الكرت",
+    "اسم المشترك",
+    "رقم الهاتف",
+    "الفئة",
+    "النشاط الرياضي",
+    "تاريخ البدء",
+    "تاريخ الانتهاء",
+    "حالة الاشتراك",
+  ];
+
+  let headerCellsXml = "";
+  headers.forEach((h) => {
+    headerCellsXml += `
+      <Cell ss:StyleID="HeaderStyle">
+        <Data ss:Type="String">${h}</Data>
+      </Cell>`;
+  });
+
+  // 2. صفوف المشتركين، كل حقل في خلية <Cell> مستقلة تماماً
+  let rowsXml = `<Row ss:Height="24">${headerCellsXml}</Row>`;
+
+  members.forEach((m) => {
+    const end = new Date(m.endDate);
+    const isExpired = end < today;
+    const statusText = isExpired ? "منتهي" : "سارٍ";
+    const statusStyle = isExpired ? "ExpiredStyle" : "ActiveStyle";
+
+    rowsXml += `
+      <Row ss:Height="20">
+        <Cell ss:StyleID="CenterStyle"><Data ss:Type="Number">${m.id}</Data></Cell>
+        <Cell ss:StyleID="NameStyle"><Data ss:Type="String">${m.name}</Data></Cell>
+        <Cell ss:StyleID="CenterStyle"><Data ss:Type="String">${m.phone}</Data></Cell>
+        <Cell ss:StyleID="CenterStyle"><Data ss:Type="String">${m.gender}</Data></Cell>
+        <Cell ss:StyleID="CenterStyle"><Data ss:Type="String">${m.activity}</Data></Cell>
+        <Cell ss:StyleID="CenterStyle"><Data ss:Type="String">${m.startDate}</Data></Cell>
+        <Cell ss:StyleID="CenterStyle"><Data ss:Type="String">${m.endDate}</Data></Cell>
+        <Cell ss:StyleID="${statusStyle}"><Data ss:Type="String">${statusText}</Data></Cell>
+      </Row>`;
+  });
+
+  // 3. بنية XML الرسمية لـ Excel لضبط اتجاه اليمين لليسار وعرض الأعمدة والتنسيق
+  const excelXml = `<?xml version="1.0" encoding="UTF-8"?>
+<?mso-application progid="Excel.Sheet"?>
+<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet"
+ xmlns:o="urn:schemas-microsoft-com:office:office"
+ xmlns:x="urn:schemas-microsoft-com:office:excel"
+ xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet">
+ 
+ <Styles>
+  <Style ss:ID="Default" ss:Name="Normal">
+   <Alignment ss:Vertical="Center"/>
+   <Font ss:FontName="Calibri" ss:Size="11"/>
+  </Style>
+  <Style ss:ID="HeaderStyle">
+   <Alignment ss:Horizontal="Center" ss:Vertical="Center"/>
+   <Borders>
+    <Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#991B1B"/>
+    <Border ss:Position="Left" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#991B1B"/>
+    <Border ss:Position="Right" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#991B1B"/>
+    <Border ss:Position="Top" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#991B1B"/>
+   </Borders>
+   <Font ss:FontName="Calibri" ss:Size="11" ss:Color="#FFFFFF" ss:Bold="1"/>
+   <Interior ss:Color="#D91B24" ss:Pattern="Solid"/>
+  </Style>
+  <Style ss:ID="CenterStyle">
+   <Alignment ss:Horizontal="Center" ss:Vertical="Center"/>
+   <Borders>
+    <Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#D3D3D3"/>
+    <Border ss:Position="Left" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#D3D3D3"/>
+    <Border ss:Position="Right" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#D3D3D3"/>
+    <Border ss:Position="Top" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#D3D3D3"/>
+   </Borders>
+  </Style>
+  <Style ss:ID="NameStyle">
+   <Alignment ss:Horizontal="Right" ss:Vertical="Center"/>
+   <Borders>
+    <Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#D3D3D3"/>
+    <Border ss:Position="Left" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#D3D3D3"/>
+    <Border ss:Position="Right" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#D3D3D3"/>
+    <Border ss:Position="Top" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#D3D3D3"/>
+   </Borders>
+   <Font ss:FontName="Calibri" ss:Size="11" ss:Bold="1"/>
+  </Style>
+  <Style ss:ID="ActiveStyle">
+   <Alignment ss:Horizontal="Center" ss:Vertical="Center"/>
+   <Borders>
+    <Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#D3D3D3"/>
+    <Border ss:Position="Left" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#D3D3D3"/>
+    <Border ss:Position="Right" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#D3D3D3"/>
+    <Border ss:Position="Top" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#D3D3D3"/>
+   </Borders>
+   <Font ss:FontName="Calibri" ss:Size="11" ss:Color="#10B981" ss:Bold="1"/>
+  </Style>
+  <Style ss:ID="ExpiredStyle">
+   <Alignment ss:Horizontal="Center" ss:Vertical="Center"/>
+   <Borders>
+    <Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#D3D3D3"/>
+    <Border ss:Position="Left" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#D3D3D3"/>
+    <Border ss:Position="Right" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#D3D3D3"/>
+    <Border ss:Position="Top" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#D3D3D3"/>
+   </Borders>
+   <Font ss:FontName="Calibri" ss:Size="11" ss:Color="#EF4444" ss:Bold="1"/>
+  </Style>
+ </Styles>
+
+ <Worksheet ss:Name="مشتركي سوبر جيم">
+  <Table>
+   <Column ss:Width="70"/>   <!-- عمود A: رقم الكرت -->
+   <Column ss:Width="160"/>  <!-- عمود B: اسم المشترك -->
+   <Column ss:Width="110"/>  <!-- عمود C: رقم الهاتف -->
+   <Column ss:Width="75"/>   <!-- عمود D: الفئة -->
+   <Column ss:Width="140"/>  <!-- عمود E: النشاط الرياضي -->
+   <Column ss:Width="95"/>   <!-- عمود F: تاريخ البدء -->
+   <Column ss:Width="95"/>   <!-- عمود G: تاريخ الانتهاء -->
+   <Column ss:Width="90"/>   <!-- عمود H: حالة الاشتراك -->
+   ${rowsXml}
+  </Table>
+  <WorksheetOptions xmlns="urn:schemas-microsoft-com:office:excel">
+   <DisplayRightToLeft/>
+  </WorksheetOptions>
+ </Worksheet>
+</Workbook>`;
+
+  const blob = new Blob([excelXml], {
+    type: "application/vnd.ms-excel;charset=utf-8",
+  });
+  const dateStr = new Date().toISOString().split("T")[0];
+  const fileName = `كشف_مشتركي_سوبر_جيم_${dateStr}.xls`;
+
+  const downloadUrl = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = downloadUrl;
+  a.download = fileName;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(downloadUrl);
+
+  backupStatus.style.color = "var(--excel-green)";
+  backupStatus.textContent = `✓ تم تصدير كشف Excel بأعمدة مستقلة بنجاح (${fileName})`;
+});
+// استعادة النسخة الاحتياطية
 restoreFileInput.addEventListener("change", function (e) {
   const file = e.target.files[0];
   if (!file) return;
@@ -465,3 +673,15 @@ restoreFileInput.addEventListener("change", function (e) {
   };
   reader.readAsText(file);
 });
+
+// ==========================================
+// 10. تفعيل تطبيق الويب التقدمي (PWA Service Worker)
+// ==========================================
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker
+      .register("./sw.js")
+      .then((reg) => console.log("SuperGym PWA Ready: ", reg.scope))
+      .catch((err) => console.log("PWA registration failed: ", err));
+  });
+}

@@ -4,13 +4,19 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>سوبر جيم - إدارة الاشتراكات</title>
+
+    <!-- إعدادات تطبيق الويب التقدمي (PWA) -->
+    <link rel="manifest" href="manifest.json" />
+    <meta name="theme-color" content="#d91b24" />
+    <link rel="apple-touch-icon" href="logo.jpg" />
+
     <link rel="stylesheet" href="style.css" />
   </head>
   <body>
     <!-- شاشة القفل التلقائي لحماية البيانات -->
     <div id="lockScreen" class="lock-screen hide">
       <div class="lock-card">
-        <div class="lock-icon">🔒</div>
+        <img src="logo.jpg" alt="لوغو سوبر جيم" class="lock-brand-logo" />
         <h2 class="lock-title">نظام سوبر جيم مقفل</h2>
         <p class="lock-sub">
           تم القفل تلقائياً لعدم وجود نشاط. أدخل الرمز السري للمتابعة:
@@ -39,6 +45,7 @@
     <!-- شاشة الترحيب والبداية التفاعلية -->
     <div id="splashScreen" class="splash-screen">
       <div class="splash-content">
+        <img src="logo.jpg" alt="سوبر جيم" class="splash-brand-logo" />
         <h1 class="splash-title">سوبر جيم</h1>
         <p class="splash-quote">سوبر جيم • القوة واللياقة تبدأ هنا</p>
         <div class="splash-progress-bar">
@@ -48,23 +55,31 @@
       </div>
     </div>
 
-    <!-- علامة مائية خلفية مفرغة تمتد عبر الشاشة -->
+    <!-- علامة مائية خلفية مفرغة -->
     <div class="watermark">سوبر جيم</div>
 
     <div class="main-wrapper">
       <!-- الهيدر: هوية النادي -->
       <header class="gym-header">
         <div class="header-content">
-          <div class="brand-typography">
-            <h1 class="brand-title">سوبر جيم</h1>
-            <span class="brand-sub">رجال • وسيدات</span>
+          <div class="brand-group">
+            <img src="logo.jpg" alt="لوغو سوبر جيم" class="header-brand-logo" />
+            <div class="brand-typography">
+              <h1 class="brand-title">سوبر جيم</h1>
+              <span class="brand-sub">رجال • وسيدات</span>
+            </div>
           </div>
+
           <div class="divider-vertical"></div>
-          <div class="coach-info">
-            <h2>بإدارة بطل الجمهورية جلال مخللاتي</h2>
-            <p class="phone-tag">📞 0935891619</p>
+
+          <div class="coach-wrapper">
+            <div class="coach-info">
+              <h2>بإدارة بطل الجمهورية جلال مخللاتي</h2>
+              <p class="phone-tag">📞 0935891619</p>
+            </div>
           </div>
         </div>
+
         <div class="header-actions">
           <button
             id="manualLockBtn"
@@ -84,7 +99,7 @@
       </header>
 
       <main class="container">
-        <!-- حقل البحث الذكي (رقم الكرت أو الاسم مع الإكمال التلقائي) -->
+        <!-- حقل البحث الذكي -->
         <section class="card search-card">
           <label for="memberSearchInput"
             >البحث السريع (ادخل رقم الكرت أو اسم المشترك)</label
@@ -106,13 +121,22 @@
           <div id="resName" class="result-name"></div>
           <div id="resDetails" class="result-details"></div>
           <div id="resStatus" class="result-status"></div>
-          <button
-            id="renewBtn"
-            class="btn-action btn-gold"
-            style="display: none"
-          >
-            تجديد شهر إضافي
-          </button>
+          <div class="result-actions">
+            <button
+              id="renewBtn"
+              class="btn-action btn-gold"
+              style="display: none"
+            >
+              تجديد شهر إضافي
+            </button>
+            <button
+              id="editMemberBtn"
+              class="btn-action btn-edit"
+              style="display: none"
+            >
+              ✏️ تعديل البيانات
+            </button>
+          </div>
         </section>
 
         <!-- استمارة تسجيل مشترك جديد -->
@@ -202,19 +226,22 @@
           </button>
         </section>
 
-        <!-- إدارة النسخ الاحتياطي والأمان -->
+        <!-- إدارة النسخ الاحتياطي والأمان وتصدير الإكسل -->
         <section class="card backup-card">
-          <h3 class="card-title">النسخ الاحتياطي السحابي والمحلي</h3>
+          <h3 class="card-title">النسخ الاحتياطي السحابي وكشوفات Excel</h3>
           <p class="backup-desc">
-            احفظ قاعدة البيانات على جهازك وأرسل نسخة مشفرة ومؤرخة مباشرة إلى
-            تيليجرام الإدارة بنقرة واحدة.
+            احفظ قاعدة البيانات، صدّر كشف المشتركين المالي بصيغة Excel، أو أرسل
+            نسخة مشفرة ومؤرخة لتطبيق تيليجرام.
           </p>
           <div class="backup-actions">
             <button id="sendBackupTelegramBtn" class="btn-action btn-telegram">
-              <span>✈️ نسخ احتياطي وإرسال إلى تيليجرام</span>
+              <span>✈️ نسخ وتيليجرام</span>
+            </button>
+            <button id="exportExcelBtn" class="btn-action btn-excel">
+              <span>📊 تصدير Excel</span>
             </button>
             <label class="btn-action btn-restore">
-              📥 استعادة من ملف
+              📥 استعادة
               <input
                 type="file"
                 id="restoreFileInput"
@@ -227,7 +254,7 @@
         </section>
       </main>
 
-      <!-- الفوتر وحفظ الحقوق -->
+      <!-- الفوتر -->
       <footer class="gym-footer">
         <p>جميع الحقوق محفوظة لنادي <strong>سوبر جيم</strong> © 2026</p>
         <p class="dev-credits">
@@ -244,10 +271,93 @@
       </footer>
     </div>
 
+    <!-- نافذة تعديل بيانات المشترك (Modal) -->
+    <div id="editModal" class="modal-backdrop hide">
+      <div class="modal-card">
+        <div class="modal-header">
+          <h3>تعديل بيانات المشترك <span id="editMemberCardId"></span></h3>
+          <button
+            id="closeEditModalBtn"
+            class="drawer-close-btn"
+            aria-label="إغلاق"
+          >
+            ✕
+          </button>
+        </div>
+        <form id="editMemberForm" class="modal-body">
+          <input type="hidden" id="editMemberId" />
+
+          <div class="form-group">
+            <label for="editFullName">الاسم الكامل</label>
+            <input type="text" id="editFullName" required />
+          </div>
+
+          <div class="form-group">
+            <label for="editPhone">رقم الهاتف (واتساب)</label>
+            <input
+              type="tel"
+              id="editPhone"
+              required
+              pattern="09[0-9]{8}"
+              maxlength="10"
+            />
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="editGender">الفئة</label>
+              <select id="editGender">
+                <option value="رجال">رجال</option>
+                <option value="سيدات">سيدات</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="editActivity">النشاط الرياضي</label>
+              <select id="editActivity">
+                <option value="بناء أجسام">بناء أجسام</option>
+                <option value="لياقة وتخفيف وزن">لياقة وتخفيف وزن</option>
+                <option value="كيك بوكسينغ">كيك بوكسينغ</option>
+                <option value="تيكواندو / كاراتيه">تيكواندو / كاراتيه</option>
+                <option value="قتال شوارع">قتال شوارع</option>
+                <option value="أيروبيك وزومبا">أيروبيك وزومبا</option>
+                <option value="تايبو / X5">تايبو / X5</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="editEndDate"
+              >تاريخ انتهاء الاشتراك (يُعدل آلياً عبر زر التجديد فقط)</label
+            >
+            <input
+              type="date"
+              id="editEndDate"
+              readonly
+              class="input-readonly"
+            />
+          </div>
+
+          <div class="modal-actions">
+            <button type="submit" class="btn-action btn-red" style="flex: 1">
+              حفظ التعديلات
+            </button>
+            <button
+              type="button"
+              id="cancelEditBtn"
+              class="btn-action btn-restore"
+              style="flex: 1"
+            >
+              إلغاء
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
     <!-- خلفية تعتيم اللوحة الجانبية -->
     <div id="drawerBackdrop" class="drawer-backdrop"></div>
 
-    <!-- اللوحة الجانبية المنزلقة لتنبيهات الواتساب -->
+    <!-- اللوحة الجانبية لتنبيهات الواتساب -->
     <aside id="expiringDrawer" class="drawer-panel">
       <div class="drawer-header">
         <h3>تنبيهات قرب انتهاء الاشتراكات</h3>
@@ -259,7 +369,7 @@
         <div id="drawerExpiringList" class="expiring-list"></div>
       </div>
     </aside>
-
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <script src="app.js"></script>
   </body>
 </html>

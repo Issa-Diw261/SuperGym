@@ -1,0 +1,22 @@
+{
+  "name": "سوبر جيم - إدارة الاشتراكات",
+  "short_name": "سوبر جيم",
+  "description": "نظام إدارة اشتراكات نادي سوبر جيم الرياضي",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#0d0f12",
+  "theme_color": "#d91b24",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "logo.jpg",
+      "sizes": "192x192",
+      "type": "image/jpeg"
+    },
+    {
+      "src": "logo.jpg",
+      "sizes": "512x512",
+      "type": "image/jpeg"
+    }
+  ]
+}
