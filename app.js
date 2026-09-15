@@ -460,7 +460,7 @@ function renderExpiring() {
 renderExpiring();
 
 // ==========================================
-// 9. النسخ الاحتياطي وتصدير كشوفات Excel
+// 9. النسخ الاحتياطي وتصدير كشوفات Excel بأعمدة حقيقية (XML Spreadsheet)
 // ==========================================
 const sendBackupTelegramBtn = document.getElementById("sendBackupTelegramBtn");
 const exportExcelBtn = document.getElementById("exportExcelBtn");
@@ -490,7 +490,8 @@ sendBackupTelegramBtn.addEventListener("click", () => {
   backupStatus.style.color = "var(--green)";
   backupStatus.textContent = `✓ تم تنزيل النسخة (${fileName}) وفتح البوت بنجاح!`;
 });
-// تصدير كشف المشتركين إلى Excel بأعمدة وخلايا حقيقية (A, B, C, D...)
+
+// تصدير كشف Excel بأعمدة وخلايا منفصلة تماماً
 exportExcelBtn.addEventListener("click", () => {
   if (members.length === 0) {
     alert("لا توجد بيانات مشتركين لتصديرها.");
@@ -500,7 +501,6 @@ exportExcelBtn.addEventListener("click", () => {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
-  // 1. عناوين الأعمدة في الصف الأول (A1, B1, C1...)
   const headers = [
     "رقم الكرت",
     "اسم المشترك",
@@ -520,7 +520,6 @@ exportExcelBtn.addEventListener("click", () => {
       </Cell>`;
   });
 
-  // 2. صفوف المشتركين، كل حقل في خلية <Cell> مستقلة تماماً
   let rowsXml = `<Row ss:Height="24">${headerCellsXml}</Row>`;
 
   members.forEach((m) => {
@@ -542,7 +541,6 @@ exportExcelBtn.addEventListener("click", () => {
       </Row>`;
   });
 
-  // 3. بنية XML الرسمية لـ Excel لضبط اتجاه اليمين لليسار وعرض الأعمدة والتنسيق
   const excelXml = `<?xml version="1.0" encoding="UTF-8"?>
 <?mso-application progid="Excel.Sheet"?>
 <Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet"
@@ -643,6 +641,7 @@ exportExcelBtn.addEventListener("click", () => {
   backupStatus.style.color = "var(--excel-green)";
   backupStatus.textContent = `✓ تم تصدير كشف Excel بأعمدة مستقلة بنجاح (${fileName})`;
 });
+
 // استعادة النسخة الاحتياطية
 restoreFileInput.addEventListener("change", function (e) {
   const file = e.target.files[0];
